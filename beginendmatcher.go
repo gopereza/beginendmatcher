@@ -24,9 +24,9 @@ func NewBeginEndMatcher(values []string) *BeginEndMatcher {
 
 		switch {
 		case value[0] == '*':
-			prefixRadixTree.Insert(value, 0)
+			suffixRadixTree.Insert(reverseAsciiString(value[1:]), 0)
 		case value[length-1] == '*':
-			suffixRadixTree.Insert(value, 0)
+			prefixRadixTree.Insert(value[:length-1], 0)
 		default:
 			fullMatchMap[value] = true
 		}
@@ -44,13 +44,15 @@ func (m *BeginEndMatcher) Match(value string) bool {
 		return true
 	}
 
-	_, _, prefixExists := m.prefixRadixTree.LongestPrefix(value)
-	if prefixExists {
+	var length = len(value)
+
+	prefix, _, prefixExists := m.prefixRadixTree.LongestPrefix(value)
+	if prefixExists && length > len(prefix) {
 		return true
 	}
 
-	_, _, suffixExists := m.suffixRadixTree.LongestPrefix(reverseAsciiString(value))
-	if suffixExists {
+	suffix, _, suffixExists := m.suffixRadixTree.LongestPrefix(reverseAsciiString(value))
+	if suffixExists && length > len(suffix) {
 		return true
 	}
 

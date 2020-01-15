@@ -65,11 +65,11 @@ func (m *SortMatcher) Match(value string) bool {
 
 		findIndex = sort.SearchStrings(values, current)
 
-		if findIndex == length {
+		if findIndex == len(values) {
 			return false
 		}
 
-		if m.values[findIndex] == current {
+		if values[findIndex] == current {
 			return true
 		}
 	}
