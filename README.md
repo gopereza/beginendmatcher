@@ -1,2 +1,3 @@
-# beginendmatcher
-Match value by prefixes and suffixes
+# Begin-end matcher
+
+Match string value by prefixes and suffixes
