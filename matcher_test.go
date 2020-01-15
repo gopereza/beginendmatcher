@@ -9,7 +9,9 @@ const (
 	base = 36
 
 	dataProviderShift = base * base
-	dataProviderLimit = 1 << 7
+	dataProviderLimit = 1 << 10
+
+	randomSuffix = "x"
 )
 
 var (
@@ -28,9 +30,15 @@ func TestSortMatcher(t *testing.T) {
 	})
 }
 
-func TestRedixTreeMatcher(t *testing.T) {
+func TestImmutableRadixTreeMatcher(t *testing.T) {
 	testMatcher(t, func(values []string) Matcher {
 		return NewImmutableRadixTreeMatcher(values)
+	})
+}
+
+func TestRadixTreeMatcher(t *testing.T) {
+	testMatcher(t, func(values []string) Matcher {
+		return NewRadixTreeMatcher(values)
 	})
 }
 
@@ -61,7 +69,7 @@ func BenchmarkPureMatcher_Match(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit])
+		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
 	}
 }
 
@@ -70,22 +78,37 @@ func BenchmarkSortMatcher_Match(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit])
+		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
 	}
 }
 
-func BenchmarkRadixTreeMatcher_Match(b *testing.B) {
+func BenchmarkImmutableRadixTreeMatcher_Match(b *testing.B) {
 	var matcher = NewImmutableRadixTreeMatcher(dataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit])
+		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+	}
+}
+
+func BenchmarkRadixTreeMatcher_Match(b *testing.B) {
+	var matcher = NewRadixTreeMatcher(dataProvider)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+	}
+}
+
+func BenchmarkNewImmutableRadixTreeMatcher(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = NewImmutableRadixTreeMatcher(dataProvider)
 	}
 }
 
 func BenchmarkNewRadixTreeMatcher(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = NewImmutableRadixTreeMatcher(dataProvider)
+		_ = NewRadixTreeMatcher(dataProvider)
 	}
 }
 

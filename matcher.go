@@ -1,6 +1,7 @@
 package beginendmatcher
 
 import (
+	"github.com/armon/go-radix"
 	"github.com/hashicorp/go-immutable-radix"
 	"sort"
 	"strings"
@@ -21,6 +22,10 @@ type (
 
 	ImmutableRadixTreeMatcher struct {
 		tree *iradix.Tree
+	}
+
+	RadixTreeMatcher struct {
+		tree *radix.Tree
 	}
 )
 
@@ -76,7 +81,7 @@ func NewImmutableRadixTreeMatcher(values []string) *ImmutableRadixTreeMatcher {
 	var tree = iradix.New()
 
 	for _, value := range values {
-		tree, _, _ = tree.Insert([]byte(value), 1)
+		tree, _, _ = tree.Insert([]byte(value), 0)
 	}
 
 	return &ImmutableRadixTreeMatcher{
@@ -85,7 +90,25 @@ func NewImmutableRadixTreeMatcher(values []string) *ImmutableRadixTreeMatcher {
 }
 
 func (m *ImmutableRadixTreeMatcher) Match(value string) bool {
-	prefix, _, exists := m.tree.Root().LongestPrefix([]byte(value))
+	_, _, exists := m.tree.Root().LongestPrefix([]byte(value))
 
-	return exists && strings.HasPrefix(value, string(prefix))
+	return exists
+}
+
+func NewRadixTreeMatcher(values []string) *RadixTreeMatcher {
+	var tree = radix.New()
+
+	for _, value := range values {
+		tree.Insert(value, 0)
+	}
+
+	return &RadixTreeMatcher{
+		tree: tree,
+	}
+}
+
+func (m *RadixTreeMatcher) Match(value string) bool {
+	_, _, exists := m.tree.LongestPrefix(value)
+
+	return exists
 }
