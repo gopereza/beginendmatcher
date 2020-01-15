@@ -48,12 +48,6 @@ func TestSortMatcher(t *testing.T) {
 	})
 }
 
-func TestImmutableRadixTreeMatcher(t *testing.T) {
-	testMatcher(t, func(values []string) Matcher {
-		return NewImmutableRadixTreeMatcher(values)
-	})
-}
-
 func TestRadixTreeMatcher(t *testing.T) {
 	testMatcher(t, func(values []string) Matcher {
 		return NewRadixTreeMatcher(values)
@@ -103,27 +97,12 @@ func BenchmarkSortMatcher_Match(b *testing.B) {
 	}
 }
 
-func BenchmarkImmutableRadixTreeMatcher_Match(b *testing.B) {
-	var matcher = NewImmutableRadixTreeMatcher(equalDataProvider)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
-	}
-}
-
 func BenchmarkRadixTreeMatcher_Match(b *testing.B) {
 	var matcher = NewRadixTreeMatcher(equalDataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
-	}
-}
-
-func BenchmarkNewImmutableRadixTreeMatcher(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		_ = NewImmutableRadixTreeMatcher(equalDataProvider)
 	}
 }
 

@@ -9,10 +9,14 @@ package main
 import "github.com/gopereza/beginendmatcher"
 
 func main() {
-	var matcher = beginendmatcher.NewRadixTreeMatcher([]string{
+	var matcher = beginendmatcher.NewBeginEndMatcher([]string{
 		"a1",
 		"b1",
 		// ...
+        "*abc",
+        // ...
+        "abc*",
+        // ...
 	})
 
 	if matcher.Match("some") {
