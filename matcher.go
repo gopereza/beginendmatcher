@@ -58,10 +58,10 @@ func (m *SortMatcher) Match(value string) bool {
 		return true
 	}
 
-	for i := 1; i < length; i++ {
+	for i := 2; i <= length; i++ {
 		var nextValues = m.values[findIndex:]
 
-		current += string(value[i])
+		current = value[0:i]
 
 		findIndex = sort.SearchStrings(nextValues, current)
 
