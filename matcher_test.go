@@ -58,6 +58,7 @@ func testMatcher(t *testing.T, newMatcher func([]string) Matcher) {
 
 	test(false, "", nil)
 	test(false, "b", []string{"a"})
+	test(false, "b", []string{"a", "c", "d", "e", "f"})
 	test(false, "abc", []string{"abcd"})
 	test(false, "ABCD", []string{"abc"})
 	test(true, "abc", []string{"ab"})
