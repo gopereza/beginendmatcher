@@ -45,25 +45,15 @@ func (m *SortMatcher) Match(value string) bool {
 		return false
 	}
 
-	var (
-		current   = value[0:1]
-		findIndex = sort.SearchStrings(m.values, current)
-	)
+	var findIndex = 0
 
-	if findIndex == length {
-		return false
-	}
+	for i := 1; i <= length; i++ {
+		var (
+			values  = m.values[findIndex:]
+			current = value[0:i]
+		)
 
-	if m.values[findIndex] == current {
-		return true
-	}
-
-	for i := 2; i <= length; i++ {
-		var nextValues = m.values[findIndex:]
-
-		current = value[0:i]
-
-		findIndex = sort.SearchStrings(nextValues, current)
+		findIndex = sort.SearchStrings(values, current)
 
 		if findIndex == length {
 			return false
