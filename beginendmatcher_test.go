@@ -24,8 +24,38 @@ func TestBeginEndMatcher_Match(t *testing.T) {
 	test(false, "abc", []string{"*abc", "abc1", "abc2"})
 	test(false, "abc", []string{"abc*", "abc1", "abc2"})
 
-	test(true, "abc", []string{"*bc", "abc1", "abc2"})
-	test(true, "abc", []string{"*c", "abc1", "abc2"})
-	test(true, "abc", []string{"a*", "abc1", "abc2"})
-	test(true, "abc", []string{"ab*", "abc1", "abc2"})
+	test(true, "abc", []string{"*bc", "nnn1", "nnn2"})
+	test(true, "abc", []string{"*c", "nnn1", "nnn2"})
+	test(true, "abc", []string{"a*", "nnn1", "nnn2"})
+	test(true, "abc", []string{"ab*", "nnn1", "nnn2"})
+}
+
+func BenchmarkBeginEndMatcher_Match(b *testing.B) {
+	var matcher = NewBeginEndMatcher(begidendMatcherDataProvider)
+	const expect = true
+
+	b.ResetTimer()
+	for i := 0; i < b.N/3; i++ {
+		var got = matcher.Match(equalDataProvider[i%dataProviderLimit])
+
+		if expect != got {
+			b.Errorf("expect %t, got %t", expect, got)
+		}
+	}
+
+	for i := 0; i < b.N/3; i++ {
+		var got = matcher.Match(random + prefixDataProvider[i%dataProviderLimit])
+
+		if expect != got {
+			b.Errorf("expect %t, got %t", expect, got)
+		}
+	}
+
+	for i := 0; i < b.N/3; i++ {
+		var got = matcher.Match(suffixDataProvider[i%dataProviderLimit] + random)
+
+		if expect != got {
+			b.Errorf("expect %t, got %t", expect, got)
+		}
+	}
 }

@@ -8,14 +8,32 @@ import (
 const (
 	base = 36
 
-	dataProviderShift = base * base
-	dataProviderLimit = 1 << 10
+	equalDataProviderShift = base * base * base * base * base
+	dataProviderLimit      = 1 << 10
 
-	randomSuffix = "x"
+	prefixDataProviderShift = equalDataProviderShift + dataProviderLimit
+	suffixDataProviderShift = prefixDataProviderShift + dataProviderLimit
+
+	random = "x"
 )
 
 var (
-	dataProvider = generateDataProvider(dataProviderShift, dataProviderLimit)
+	equalDataProvider  = generateDataProvider("", "", equalDataProviderShift, dataProviderLimit)
+	prefixDataProvider = generateDataProvider("", "", prefixDataProviderShift, dataProviderLimit)
+	suffixDataProvider = generateDataProvider("", "", suffixDataProviderShift, dataProviderLimit)
+
+	prefixMatcherDataProvider   = generateDataProvider("*", "", prefixDataProviderShift, dataProviderLimit)
+	suffixMatcherDataProvider   = generateDataProvider("", "*", suffixDataProviderShift, dataProviderLimit)
+	begidendMatcherDataProvider = append(
+		append(
+			append(
+				make([]string, 0, 3*dataProviderLimit),
+				equalDataProvider...,
+			),
+			prefixMatcherDataProvider...,
+		),
+		suffixMatcherDataProvider...,
+	)
 )
 
 func TestPureMatcher(t *testing.T) {
@@ -68,54 +86,54 @@ func testMatcher(t *testing.T, newMatcher func([]string) Matcher) {
 }
 
 func BenchmarkPureMatcher_Match(b *testing.B) {
-	var matcher = NewPureMatcher(dataProvider)
+	var matcher = NewPureMatcher(equalDataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
 	}
 }
 
 func BenchmarkSortMatcher_Match(b *testing.B) {
-	var matcher = NewSortMatcher(dataProvider)
+	var matcher = NewSortMatcher(equalDataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
 	}
 }
 
 func BenchmarkImmutableRadixTreeMatcher_Match(b *testing.B) {
-	var matcher = NewImmutableRadixTreeMatcher(dataProvider)
+	var matcher = NewImmutableRadixTreeMatcher(equalDataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
 	}
 }
 
 func BenchmarkRadixTreeMatcher_Match(b *testing.B) {
-	var matcher = NewRadixTreeMatcher(dataProvider)
+	var matcher = NewRadixTreeMatcher(equalDataProvider)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		matcher.Match(dataProvider[i%dataProviderLimit] + randomSuffix)
+		matcher.Match(equalDataProvider[i%dataProviderLimit] + random)
 	}
 }
 
 func BenchmarkNewImmutableRadixTreeMatcher(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = NewImmutableRadixTreeMatcher(dataProvider)
+		_ = NewImmutableRadixTreeMatcher(equalDataProvider)
 	}
 }
 
 func BenchmarkNewRadixTreeMatcher(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = NewRadixTreeMatcher(dataProvider)
+		_ = NewRadixTreeMatcher(equalDataProvider)
 	}
 }
 
-func generateDataProvider(shift, limit int) []string {
+func generateDataProvider(prefix, suffix string, shift, limit int) []string {
 	var (
 		to = shift + limit
 	)
@@ -123,7 +141,7 @@ func generateDataProvider(shift, limit int) []string {
 	var result = make([]string, 0, limit)
 
 	for i := shift; i < to; i++ {
-		result = append(result, strconv.FormatUint(uint64(i), base))
+		result = append(result, prefix+strconv.FormatUint(uint64(i), base)+suffix)
 	}
 
 	return result
