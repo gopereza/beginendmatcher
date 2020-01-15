@@ -16,9 +16,25 @@ var (
 	dataProvider = generateDataProvider(dataProviderShift, dataProviderLimit)
 )
 
-func TestDirectMatch(t *testing.T) {
+func TestPureMatcher(t *testing.T) {
+	testMatcher(t, func(values []string) Matcher {
+		return NewPureMatcher(values)
+	})
+}
+
+func TestSortMatcher(t *testing.T) {
+	testMatcher(t, func(values []string) Matcher {
+		return NewSortMatcher(values)
+	})
+}
+
+func testMatcher(t *testing.T, newMatcher func([]string) Matcher) {
+	t.Helper()
+
 	var test = func(expect bool, value string, prefixes []string) {
-		var matcher = NewMatcher(prefixes)
+		t.Helper()
+
+		var matcher = newMatcher(prefixes)
 		var got = matcher.Match(value)
 
 		if expect != got {
@@ -30,10 +46,20 @@ func TestDirectMatch(t *testing.T) {
 	test(false, "b", []string{"a"})
 	test(false, "abc", []string{"abcd"})
 	test(true, "abc", []string{"ab"})
+	test(true, "abc", []string{"abc"})
+	test(true, "bcd", []string{"ab", "bcd"})
 }
 
-func BenchmarkMatcher_Match(b *testing.B) {
-	var matcher = NewMatcher(dataProvider)
+func BenchmarkPureMatcher_Match(b *testing.B) {
+	var matcher = NewPureMatcher(dataProvider)
+
+	for i := 0; i < b.N; i++ {
+		matcher.Match(dataProvider[i%dataProviderLimit])
+	}
+}
+
+func BenchmarkSortMatcher_Match(b *testing.B) {
+	var matcher = NewSortMatcher(dataProvider)
 
 	for i := 0; i < b.N; i++ {
 		matcher.Match(dataProvider[i%dataProviderLimit])
